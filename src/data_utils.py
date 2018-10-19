@@ -123,6 +123,16 @@ def expmap2rotmat(r):
   return R
 
 
+def wrap_angle(rad, center=0):
+  return ( rad - center + np.pi) % (2 * np.pi ) - np.pi
+
+def norm_pi(rad, center):
+  return wrap_angle(rad, center)/np.pi
+
+def unorm_pi(rad, center):
+  return wrap_angle(rad*np.pi, -center)
+
+
 def unNormalizeData(normalizedData, data_mean, data_std, dimensions_to_ignore, actions, one_hot ):
   """Borrowed from SRNN code. Reads a csv file and returns a float32 matrix.
   https://github.com/asheshjain399/RNNexp/blob/srnn/structural_rnn/CRFProblems/H3.6m/generateMotionData.py#L12
@@ -154,11 +164,12 @@ def unNormalizeData(normalizedData, data_mean, data_std, dimensions_to_ignore, a
     origData[:, dimensions_to_use] = normalizedData
 
   # potentially ineficient, but only done once per experiment
-  stdMat = data_std.reshape((1, D))
-  stdMat = np.repeat(stdMat, T, axis=0)
-  meanMat = data_mean.reshape((1, D))
-  meanMat = np.repeat(meanMat, T, axis=0)
-  origData = np.multiply(origData, stdMat) + meanMat
+  # stdMat = data_std.reshape((1, D))
+  # stdMat = np.repeat(stdMat, T, axis=0)
+  # meanMat = data_mean.reshape((1, D))
+  # meanMat = np.repeat(meanMat, T, axis=0)
+  # origData = np.multiply(origData, stdMat) + meanMat
+  origData = unorm_pi(origData, data_mean)
   return origData
 
 
@@ -291,13 +302,15 @@ def normalize_data( data, data_mean, data_std, dim_to_use, actions, one_hot ):
   if not one_hot:
     # No one-hot encoding... no need to do anything special
     for key in data.keys():
-      data_out[ key ] = np.divide( (data[key] - data_mean), data_std )
+      data_out[ key ] = norm_pi(data[key], data_mean)
+      # data_out[ key ] = np.divide( (data[key] - data_mean), data_std )
       data_out[ key ] = data_out[ key ][ :, dim_to_use ]
 
   else:
     # TODO hard-coding 99 dimensions for un-normalized human poses
     for key in data.keys():
-      data_out[ key ] = np.divide( (data[key][:, 0:99] - data_mean), data_std )
+      data_out[ key ] = norm_pi(data[key][:, 0:99], data_mean)
+      # data_out[ key ] = np.divide( (data[key][:, 0:99] - data_mean), data_std )
       data_out[ key ] = data_out[ key ][ :, dim_to_use ]
       data_out[ key ] = np.hstack( (data_out[key], data[key][:,-nactions:]) )
 
