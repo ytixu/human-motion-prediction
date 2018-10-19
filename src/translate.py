@@ -207,11 +207,11 @@ def train():
           for i in np.arange(N_SEQUENCE_TEST):
             eulerchannels_pred = srnn_pred_expmap[i]
 
-            # Convert from exponential map to Euler angles
-            for j in np.arange( eulerchannels_pred.shape[0] ):
-              for k in np.arange(3,97,3):
-                eulerchannels_pred[j,k:k+3] = data_utils.rotmat2euler(
-                  data_utils.expmap2rotmat( eulerchannels_pred[j,k:k+3] ))
+            # # Convert from exponential map to Euler angles
+            # for j in np.arange( eulerchannels_pred.shape[0] ):
+            #   for k in np.arange(3,97,3):
+            #     eulerchannels_pred[j,k:k+3] = data_utils.rotmat2euler(
+            #       data_utils.expmap2rotmat( eulerchannels_pred[j,k:k+3] ))
 
             # The global translation (first 3 entries) and global rotation
             # (next 3 entries) are also not considered in the error, so the_key
@@ -224,7 +224,7 @@ def train():
             # function provided by Ashesh Jain (in matlab), available at
             # https://github.com/asheshjain399/RNNexp/blob/srnn/structural_rnn/CRFProblems/H3.6m/dataParser/Utils/motionGenerationError.m#L40-L54
             idx_to_use = np.where( np.std( gt_i, 0 ) > 1e-4 )[0]
-            
+
             euc_error = np.power( gt_i[:,idx_to_use] - eulerchannels_pred[:,idx_to_use], 2)
             euc_error = np.sum(euc_error, 1)
             euc_error = np.sqrt( euc_error )
@@ -516,10 +516,10 @@ def get_srnn_gts( actions, model, test_set, data_mean, data_std, dim_to_ignore, 
     for i in np.arange( srnn_expmap.shape[0] ):
       denormed = data_utils.unNormalizeData(srnn_expmap[i,:,:], data_mean, data_std, dim_to_ignore, actions, one_hot )
 
-      if to_euler:
-        for j in np.arange( denormed.shape[0] ):
-          for k in np.arange(3,97,3):
-            denormed[j,k:k+3] = data_utils.rotmat2euler( data_utils.expmap2rotmat( denormed[j,k:k+3] ))
+      # if to_euler:
+      #   for j in np.arange( denormed.shape[0] ):
+      #     for k in np.arange(3,97,3):
+      #       denormed[j,k:k+3] = data_utils.rotmat2euler( data_utils.expmap2rotmat( denormed[j,k:k+3] ))
 
       srnn_gt_euler.append( denormed );
 
@@ -596,10 +596,10 @@ def sample():
 
         eulerchannels_pred = srnn_pred_expmap[i]
 
-        for j in np.arange( eulerchannels_pred.shape[0] ):
-          for k in np.arange(3,97,3):
-            eulerchannels_pred[j,k:k+3] = data_utils.rotmat2euler(
-              data_utils.expmap2rotmat( eulerchannels_pred[j,k:k+3] ))
+        # for j in np.arange( eulerchannels_pred.shape[0] ):
+        #   for k in np.arange(3,97,3):
+        #     eulerchannels_pred[j,k:k+3] = data_utils.rotmat2euler(
+        #       data_utils.expmap2rotmat( eulerchannels_pred[j,k:k+3] ))
 
         eulerchannels_pred[:,0:6] = 0
 

@@ -247,14 +247,19 @@ def load_data(path_to_dataset, subjects, actions, one_hot):
         n, d = action_sequence.shape
         even_list = range(0, n, 2)
 
+        # CONVERT TO EULER
+        action_sequence = action_sequence[even_list, :]
+        for k in np.arange(3,97,3):
+          action_sequence[k:k+3] = rotmat2euler( expmap2rotmat( action_sequence[k:k+3] ))
+
         if one_hot:
           # Add a one-hot encoding at the end of the representation
           the_sequence = np.zeros( (len(even_list), d + nactions), dtype=float )
-          the_sequence[ :, 0:d ] = action_sequence[even_list, :]
+          the_sequence[ :, 0:d ] = action_sequence
           the_sequence[ :, d+action_idx ] = 1
           trainData[(subj, action, subact, 'even')] = the_sequence
         else:
-          trainData[(subj, action, subact, 'even')] = action_sequence[even_list, :]
+          trainData[(subj, action, subact, 'even')] = action_sequence
 
 
         if len(completeData) == 0:
