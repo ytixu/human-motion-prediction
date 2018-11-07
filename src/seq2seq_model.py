@@ -151,7 +151,7 @@ class Seq2SeqModel(object):
     # Gradients and SGD update operation for training the model.
     params = tf.trainable_variables()
 
-    opt = tf.contrib.opt.NadamOptimizer(self.learning_rate)
+    opt = tf.train.AdamOptimizer( self.learning_rate )
     #tf.train.GradientDescentOptimizer( self.learning_rate )
 
     # Update all the trainable parameters
