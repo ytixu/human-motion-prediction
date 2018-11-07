@@ -142,7 +142,8 @@ class Seq2SeqModel(object):
     self.outputs = outputs
 
     with tf.name_scope("loss_angles"):
-      loss_angles = tf.reduce_mean(tf.square(tf.subtract(dec_out, outputs)))
+      loss_angles = tf.reduce_mean(tf.abs(tf.subtract(dec_out, outputs)))
+      #tf.reduce_mean(tf.square(tf.subtract(dec_out, outputs)))
 
     self.loss         = loss_angles
     self.loss_summary = tf.summary.scalar('loss/loss', self.loss)
@@ -150,7 +151,8 @@ class Seq2SeqModel(object):
     # Gradients and SGD update operation for training the model.
     params = tf.trainable_variables()
 
-    opt = tf.train.GradientDescentOptimizer( self.learning_rate )
+    opt = tf.contrib.opt.NadamOptimizer(self.learning_rate)
+    #tf.train.GradientDescentOptimizer( self.learning_rate )
 
     # Update all the trainable parameters
     gradients = tf.gradients( self.loss, params )
