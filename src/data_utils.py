@@ -260,8 +260,9 @@ def load_data(path_to_dataset, subjects, actions, one_hot):
 
         # CONVERT TO EULER
         action_sequence = action_sequence[even_list, :]
-        for k in np.arange(3,97,3):
-          action_sequence[k:k+3] = rotmat2euler( expmap2rotmat( action_sequence[k:k+3] ))
+	for j in np.arange( action_sequence.shape[0] ):
+	        for k in np.arange(3,97,3):
+        		  action_sequence[j, k:k+3] = rotmat2euler( expmap2rotmat( action_sequence[j, k:k+3] ))
 
         if one_hot:
           # Add a one-hot encoding at the end of the representation
@@ -336,6 +337,7 @@ def normalization_stats(completeData):
   dimensions_to_ignore = []
   dimensions_to_use    = []
 
+  data_std[:6] = 0
   dimensions_to_ignore.extend( list(np.where(data_std < 1e-4)[0]) )
   dimensions_to_use.extend( list(np.where(data_std >= 1e-4)[0]) )
 
