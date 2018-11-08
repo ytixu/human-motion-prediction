@@ -30,6 +30,7 @@ class Seq2SeqModel(object):
                batch_size,
                learning_rate,
                learning_rate_decay_factor,
+               learning_rate_step,
                summaries_dir,
                loss_to_use,
                number_of_actions,
@@ -74,9 +75,10 @@ class Seq2SeqModel(object):
     self.target_seq_len = target_seq_len
     self.rnn_size = rnn_size
     self.batch_size = batch_size
-    self.learning_rate = tf.Variable( float(learning_rate), trainable=False, dtype=dtype )
-    self.learning_rate_decay_op = self.learning_rate.assign( self.learning_rate * learning_rate_decay_factor )
+    #self.learning_rate = tf.Variable( float(learning_rate), trainable=False, dtype=dtype )
+    #self.learning_rate_decay_op = self.learning_rate.assign( self.learning_rate * learning_rate_decay_factor )
     self.global_step = tf.Variable(0, trainable=False)
+    self.learning_rate = tf.train.exponential_decay(float(learning_rate), self.global_step, learning_rate_step, learning_rate_decay_factor, staircase=True)
 
     # === Create the RNN that will keep the state ===
     print('rnn_size = {0}'.format( rnn_size ))
@@ -151,7 +153,7 @@ class Seq2SeqModel(object):
     # Gradients and SGD update operation for training the model.
     params = tf.trainable_variables()
 
-    opt = tf.train.AdamOptimizer( self.learning_rate )
+    self.opt = tf.train.AdamOptimizer( self.learning_rate )
     #tf.train.GradientDescentOptimizer( self.learning_rate )
 
     # Update all the trainable parameters
@@ -159,7 +161,7 @@ class Seq2SeqModel(object):
 
     clipped_gradients, norm = tf.clip_by_global_norm(gradients, max_gradient_norm)
     self.gradient_norms = norm
-    self.updates = opt.apply_gradients(
+    self.updates = self.opt.apply_gradients(
       zip(clipped_gradients, params), global_step=self.global_step)
 
     # Keep track of the learning rate

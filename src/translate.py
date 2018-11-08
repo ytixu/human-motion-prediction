@@ -75,6 +75,7 @@ def create_model(session, actions, sampling=False):
       FLAGS.batch_size,
       FLAGS.learning_rate,
       FLAGS.learning_rate_decay_factor,
+      FLAGS.learning_rate_step,
       summaries_dir,
       FLAGS.loss_to_use if not sampling else "sampling_based",
       len( actions ),
@@ -163,8 +164,8 @@ def train():
       current_step += 1
 
       # === step decay ===
-      if current_step % FLAGS.learning_rate_step == 0:
-        sess.run(model.learning_rate_decay_op)
+      #if current_step % FLAGS.learning_rate_step == 0:
+      #  sess.run(model.learning_rate_decay_op)
 
       # Once in a while, we save checkpoint, print statistics, and run evals.
       if current_step % FLAGS.test_every == 0:
@@ -461,14 +462,14 @@ def train():
         print()
         print("============================\n"
               "Global step:         %d\n"
-              "Learning rate:       %.4f\n"
+              "Learning rate:       %.6f\n"
               "Step-time (ms):     %.4f\n"
               "Train loss avg:      %.4f\n"
               "--------------------------\n"
               "Val loss:            %.4f\n"
               "srnn loss:           %.4f\n"
               "============================" % (model.global_step.eval(),
-              model.learning_rate.eval(), step_time*1000, loss,
+              model.opt._lr.eval(), step_time*1000, loss,
               val_loss, srnn_loss))
         print()
 
